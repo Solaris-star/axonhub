@@ -227,7 +227,7 @@ export type RetryableErrorPattern = z.infer<typeof retryableErrorPatternSchema>;
 // Channel Settings
 export const channelSettingsSchema = z.object({
   extraModelPrefix: z.string().optional(),
-  modelMappings: z.array(modelMappingSchema).nullable(),
+  modelMappings: z.array(modelMappingSchema).optional().nullable(),
   autoTrimedModelPrefixes: z.array(z.string()).optional().nullable(),
   hideOriginalModels: z.boolean().optional(),
   hideMappedModels: z.boolean().optional(),
