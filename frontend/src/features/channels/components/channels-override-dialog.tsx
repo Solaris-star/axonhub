@@ -852,7 +852,7 @@ export function ChannelsOverrideDialog({ open, onOpenChange, currentRow }: Props
                     <CardDescription>{t('channels.dialogs.settings.overrides.headers.description')}</CardDescription>
                   </CardHeader>
                   <CardContent className='min-h-0 flex-1 space-y-3 overflow-y-auto'>
-                    {currentRow.type.startsWith('anthropic') && (
+                    {(currentRow.type.startsWith('anthropic') || currentRow.type.startsWith('openai')) && (
                       <div className='flex items-center justify-between rounded-md border p-3'>
                         <div className='space-y-0.5 pr-4'>
                           <Label htmlFor='claudeCodeHeaders'>

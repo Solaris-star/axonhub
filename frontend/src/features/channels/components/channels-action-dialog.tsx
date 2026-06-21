@@ -2572,7 +2572,7 @@ export function ChannelsActionDialog({ currentRow, duplicateFromRow, open, onOpe
                         </div>
                       </FormItem>
 
-                      {selectedType?.startsWith('anthropic') && (
+                      {(selectedType?.startsWith('anthropic') || selectedType?.startsWith('openai')) && (
                         <FormField
                           control={form.control}
                           name='settings.claudeCodeHeaders'
