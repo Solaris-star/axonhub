@@ -1244,9 +1244,40 @@ export function ChannelsActionDialog({ currentRow, duplicateFromRow, open, onOpe
       setSupportedModels([]);
       setManualModels([]);
       onOpenChange(false);
-    } catch (_error) {
-      void _error;
+    } catch (error) {
+      // Surface the real mutation error instead of silently swallowing it.
+      console.error('Channel save failed:', error);
+      const message =
+        error instanceof Error
+          ? error.message
+          : typeof error === 'string'
+            ? error
+            : (() => {
+                try {
+                  return JSON.stringify(error);
+                } catch {
+                  return String(error);
+                }
+              })();
+      toast.error(message || t('common.errors.somethingWentWrong'));
     }
+  };
+
+  // Surface react-hook-form validation failures so the Create/Save button can no
+  // longer fail silently when a hidden/required field (e.g. defaultTestModel) is invalid.
+  const onInvalid = (errors: Record<string, unknown>) => {
+    const fieldNames = Object.keys(errors);
+    console.error('Channel form validation failed:', errors);
+    const firstError = errors[fieldNames[0]] as { message?: string } | undefined;
+    const firstMessage = firstError?.message;
+    const translatedFirst = firstMessage ? t(firstMessage, { defaultValue: firstMessage }) : '';
+    toast.error(
+      t('channels.messages.formValidationFailed', {
+        defaultValue: 'Please fix the highlighted fields: {{fields}}{{detail}}',
+        fields: fieldNames.join(', '),
+        detail: translatedFirst ? ` — ${translatedFirst}` : '',
+      })
+    );
   };
 
   const addModel = () => {
@@ -1506,6 +1537,28 @@ export function ChannelsActionDialog({ currentRow, duplicateFromRow, open, onOpe
     setSelectedFetchedModels([]);
   }, [selectedFetchedModels]);
 
+  // Keep the form's supportedModels field and the locally-managed supportedModels
+  // state in sync so schema validation (and any field-level UI) reflects the models
+  // the user actually added. Also auto-pick a defaultTestModel when one isn't set yet,
+  // so the required `defaultTestModel` validation can no longer silently block submit
+  // after the user adds models but hasn't manually opened the select.
+  useEffect(() => {
+    const currentFormModels = (form.getValues('supportedModels') as string[] | undefined) || [];
+    const sameModels =
+      currentFormModels.length === supportedModels.length && currentFormModels.every((m, i) => m === supportedModels[i]);
+    if (!sameModels) {
+      form.setValue('supportedModels', supportedModels, { shouldDirty: true });
+    }
+
+    const currentDefault = (form.getValues('defaultTestModel') as string | undefined) || '';
+    if (supportedModels.length > 0 && (!currentDefault || !supportedModels.includes(currentDefault))) {
+      form.setValue('defaultTestModel', supportedModels[0], { shouldDirty: true, shouldValidate: true });
+    } else if (supportedModels.length === 0 && currentDefault) {
+      form.setValue('defaultTestModel', '', { shouldDirty: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [supportedModels]);
+
   // Close panel handler
   const closeFetchedModelsPanel = useCallback(() => {
     setShowFetchedModelsPanel(false);
@@ -1675,7 +1728,7 @@ export function ChannelsActionDialog({ currentRow, duplicateFromRow, open, onOpe
               className={`flex min-h-0 flex-1 flex-col overflow-hidden py-1 transition-all duration-300 ${showFetchedModelsPanel || showSupportedModelsPanel || showApiKeysPanel ? 'pr-2' : 'pr-0'}`}
             >
               <Form {...form}>
-                <form id='channel-form' onSubmit={form.handleSubmit(onSubmit)} className='flex min-h-0 flex-1 flex-col space-y-6 p-0.5'>
+                <form id='channel-form' onSubmit={form.handleSubmit(onSubmit, onInvalid)} className='flex min-h-0 flex-1 flex-col space-y-6 p-0.5'>
                   {/* Provider Selection - Left Side */}
                   <div className='flex min-h-0 flex-1 flex-col gap-4 overflow-hidden md:flex-row md:gap-6'>
                     <div className='flex max-h-48 min-h-0 w-full flex-shrink-0 flex-col md:max-h-none md:w-60'>
