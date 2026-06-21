@@ -18,6 +18,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { TagsAutocompleteInput } from '@/components/ui/tags-autocomplete-input';
 import { Textarea } from '@/components/ui/textarea';
@@ -2570,6 +2571,32 @@ export function ChannelsActionDialog({ currentRow, duplicateFromRow, open, onOpe
                           )}
                         </div>
                       </FormItem>
+
+                      {selectedType?.startsWith('anthropic') && (
+                        <FormField
+                          control={form.control}
+                          name='settings.claudeCodeHeaders'
+                          render={({ field }) => (
+                            <FormItem className='grid grid-cols-1 items-start gap-x-6 gap-y-2 md:grid-cols-8'>
+                              <FormLabel className='pt-2 font-medium md:col-span-2 md:text-right'>
+                                {t('channels.dialogs.settings.overrides.headers.claudeCodeHeaders.label')}
+                              </FormLabel>
+                              <div className='space-y-2 md:col-span-6'>
+                                <FormControl>
+                                  <Switch
+                                    data-testid='claude-code-headers-switch'
+                                    checked={field.value === true}
+                                    onCheckedChange={(checked) => field.onChange(checked === true)}
+                                  />
+                                </FormControl>
+                                <p className='text-muted-foreground text-xs'>
+                                  {t('channels.dialogs.settings.overrides.headers.claudeCodeHeaders.description')}
+                                </p>
+                              </div>
+                            </FormItem>
+                          )}
+                        />
+                      )}
 
                       <FormItem className='grid grid-cols-1 items-start gap-x-6 gap-y-2 md:grid-cols-8'>
                         <div className='flex items-center gap-1.5 pt-2 md:col-span-2 md:justify-end'>
