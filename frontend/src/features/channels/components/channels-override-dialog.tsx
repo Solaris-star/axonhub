@@ -870,7 +870,10 @@ export function ChannelsOverrideDialog({ open, onOpenChange, currentRow }: Props
                           id='claudeCodeHeaders'
                           data-testid='claude-code-headers-switch'
                           checked={form.watch('claudeCodeHeaders') || false}
-                          onCheckedChange={(checked) => form.setValue('claudeCodeHeaders', checked === true)}
+                          onCheckedChange={(checked) => {
+                            form.setValue('claudeCodeHeaders', checked === true);
+                            if (checked === true) form.setValue('codexHeaders', false);
+                          }}
                         />
                       </div>
                     )}
@@ -888,7 +891,10 @@ export function ChannelsOverrideDialog({ open, onOpenChange, currentRow }: Props
                           id='codexHeaders'
                           data-testid='codex-headers-switch'
                           checked={form.watch('codexHeaders') || false}
-                          onCheckedChange={(checked) => form.setValue('codexHeaders', checked === true)}
+                          onCheckedChange={(checked) => {
+                            form.setValue('codexHeaders', checked === true);
+                            if (checked === true) form.setValue('claudeCodeHeaders', false);
+                          }}
                         />
                       </div>
                     )}

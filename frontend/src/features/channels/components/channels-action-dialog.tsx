@@ -2586,7 +2586,10 @@ export function ChannelsActionDialog({ currentRow, duplicateFromRow, open, onOpe
                                   <Switch
                                     data-testid='claude-code-headers-switch'
                                     checked={field.value === true}
-                                    onCheckedChange={(checked) => field.onChange(checked === true)}
+                                    onCheckedChange={(checked) => {
+                                      field.onChange(checked === true);
+                                      if (checked === true) form.setValue('settings.codexHeaders', false);
+                                    }}
                                   />
                                 </FormControl>
                                 <p className='text-muted-foreground text-xs'>
@@ -2612,7 +2615,10 @@ export function ChannelsActionDialog({ currentRow, duplicateFromRow, open, onOpe
                                   <Switch
                                     data-testid='codex-headers-switch'
                                     checked={field.value === true}
-                                    onCheckedChange={(checked) => field.onChange(checked === true)}
+                                    onCheckedChange={(checked) => {
+                                      field.onChange(checked === true);
+                                      if (checked === true) form.setValue('settings.claudeCodeHeaders', false);
+                                    }}
                                   />
                                 </FormControl>
                                 <p className='text-muted-foreground text-xs'>
