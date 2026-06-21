@@ -197,6 +197,13 @@ type ChannelSettings struct {
 	// trigger retry for this channel. When Regex is false, Pattern is matched as a
 	// case-sensitive substring of the error text.
 	RetryableErrorPatterns []RetryableErrorPattern `json:"retryableErrorPatterns,omitempty"`
+
+	// ClaudeCodeHeaders, when true, injects the standard Claude Code CLI header set
+	// (User-Agent, Anthropic-Beta, X-App, X-Stainless-*, Anthropic-Dangerous-Direct-Browser-Access)
+	// into outbound requests as the base header-override set. The channel's auth (e.g. x-api-key)
+	// and type are unchanged and no request body / system prompt is injected. The channel's own
+	// header overrides take precedence on path collision. nil/false = off.
+	ClaudeCodeHeaders *bool `json:"claudeCodeHeaders,omitempty"`
 }
 
 type RetryableErrorPattern struct {

@@ -11,6 +11,7 @@ import (
 
 	"github.com/looplj/axonhub/internal/log"
 	"github.com/looplj/axonhub/internal/objects"
+	"github.com/looplj/axonhub/llm/transformer/anthropic/claudecode"
 )
 
 // GetBodyOverrideOperations returns the cached override operations for the channel.
@@ -65,22 +66,58 @@ func (c *Channel) GetHeaderOverrideOperations() []objects.OverrideOperation {
 		return c.cachedOverrideHeaders
 	}
 
+	// User-configured header overrides. The new operations field takes precedence (an
+	// explicit empty slice means "no user overrides"); the legacy OverrideHeaders is
+	// converted. nil means "not configured".
+	var userOps []objects.OverrideOperation
+
 	if c.Settings != nil {
-		// New schema field takes precedence. Even an explicit empty slice means "no overrides".
 		if c.Settings.HeaderOverrideOperations != nil {
-			c.cachedOverrideHeaders = c.Settings.HeaderOverrideOperations
-			return c.cachedOverrideHeaders
+			userOps = c.Settings.HeaderOverrideOperations
+		} else if len(c.Settings.OverrideHeaders) > 0 {
+			userOps = objects.HeaderEntriesToOverrideOperations(c.Settings.OverrideHeaders)
 		}
 	}
 
-	if c.Settings == nil || len(c.Settings.OverrideHeaders) == 0 {
+	// ClaudeCodeHeaders toggle: use the standard Claude Code CLI header set as the base,
+	// with the channel's own header overrides taking precedence on path collision.
+	if c.Settings != nil && c.Settings.ClaudeCodeHeaders != nil && *c.Settings.ClaudeCodeHeaders {
+		c.cachedOverrideHeaders = MergeOverrideHeaders(claudeCodeHeaderOps(), userOps)
+		return c.cachedOverrideHeaders
+	}
+
+	if userOps == nil {
 		c.cachedOverrideHeaders = make([]objects.OverrideOperation, 0)
 		return c.cachedOverrideHeaders
 	}
 
-	c.cachedOverrideHeaders = objects.HeaderEntriesToOverrideOperations(c.Settings.OverrideHeaders)
+	c.cachedOverrideHeaders = userOps
 
 	return c.cachedOverrideHeaders
+}
+
+// claudeCodeHeaderOps returns the standard Claude Code CLI outbound header set as
+// "set" override operations. Mirrors the header set sent by the claudecode transformer
+// (llm/transformer/anthropic/claudecode). Used by the per-channel ClaudeCodeHeaders toggle
+// to disguise outbound anthropic requests as the official Claude Code CLI while keeping the
+// channel's own auth (x-api-key) and type unchanged.
+func claudeCodeHeaderOps() []objects.OverrideOperation {
+	return []objects.OverrideOperation{
+		{Op: objects.OverrideOpSet, Path: "User-Agent", Value: claudecode.UserAgent},
+		{Op: objects.OverrideOpSet, Path: "Anthropic-Beta", Value: claudecode.ClaudeCodeBetaHeader},
+		{Op: objects.OverrideOpSet, Path: "Anthropic-Version", Value: claudecode.ClaudeCodeVersionHeader},
+		{Op: objects.OverrideOpSet, Path: "Anthropic-Dangerous-Direct-Browser-Access", Value: claudecode.ClaudeCodeBrowserAccessHeader},
+		{Op: objects.OverrideOpSet, Path: "X-App", Value: claudecode.ClaudeCodeAppHeader},
+		{Op: objects.OverrideOpSet, Path: "X-Stainless-Helper-Method", Value: "stream"},
+		{Op: objects.OverrideOpSet, Path: "X-Stainless-Retry-Count", Value: "0"},
+		{Op: objects.OverrideOpSet, Path: "X-Stainless-Runtime-Version", Value: "v24.3.0"},
+		{Op: objects.OverrideOpSet, Path: "X-Stainless-Package-Version", Value: "0.94.0"},
+		{Op: objects.OverrideOpSet, Path: "X-Stainless-Runtime", Value: "node"},
+		{Op: objects.OverrideOpSet, Path: "X-Stainless-Lang", Value: "js"},
+		{Op: objects.OverrideOpSet, Path: "X-Stainless-Arch", Value: "arm64"},
+		{Op: objects.OverrideOpSet, Path: "X-Stainless-Os", Value: "MacOS"},
+		{Op: objects.OverrideOpSet, Path: "X-Stainless-Timeout", Value: "600"},
+	}
 }
 
 const ClearHeaderDirective = "__AXONHUB_CLEAR__"

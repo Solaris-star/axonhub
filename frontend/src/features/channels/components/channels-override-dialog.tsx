@@ -13,6 +13,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { useDebounce } from '@/hooks/use-debounce';
@@ -121,6 +122,7 @@ function SaveTemplateDialog({ open, onOpenChange, onSave, isSaving }: SaveTempla
 const overrideFormSchema = z.object({
   headerOverrideOperations: z.array(overrideOperationSchema).optional(),
   bodyOverrideOperations: z.array(overrideOperationSchema).optional(),
+  claudeCodeHeaders: z.boolean().optional(),
 });
 
 type OverrideFormValues = z.infer<typeof overrideFormSchema>;
@@ -528,6 +530,7 @@ export function ChannelsOverrideDialog({ open, onOpenChange, currentRow }: Props
     defaultValues: {
       headerOverrideOperations: currentRow.settings?.headerOverrideOperations || [],
       bodyOverrideOperations: currentRow.settings?.bodyOverrideOperations || [],
+      claudeCodeHeaders: currentRow.settings?.claudeCodeHeaders ?? false,
     },
   });
 
@@ -557,6 +560,7 @@ export function ChannelsOverrideDialog({ open, onOpenChange, currentRow }: Props
     form.reset({
       headerOverrideOperations: nextHeaders,
       bodyOverrideOperations: nextParams,
+      claudeCodeHeaders: currentRow.settings?.claudeCodeHeaders ?? false,
     });
   }, [currentRow, open, form]);
 
@@ -658,6 +662,7 @@ export function ChannelsOverrideDialog({ open, onOpenChange, currentRow }: Props
       const nextSettings = mergeChannelSettingsForUpdate(currentRow.settings, {
         bodyOverrideOperations: validBodyOps,
         headerOverrideOperations: validHeaderOps,
+        claudeCodeHeaders: data.claudeCodeHeaders ?? false,
       });
 
       await updateChannel.mutateAsync({
@@ -847,6 +852,24 @@ export function ChannelsOverrideDialog({ open, onOpenChange, currentRow }: Props
                     <CardDescription>{t('channels.dialogs.settings.overrides.headers.description')}</CardDescription>
                   </CardHeader>
                   <CardContent className='min-h-0 flex-1 space-y-3 overflow-y-auto'>
+                    {currentRow.type.startsWith('anthropic') && (
+                      <div className='flex items-center justify-between rounded-md border p-3'>
+                        <div className='space-y-0.5 pr-4'>
+                          <Label htmlFor='claudeCodeHeaders'>
+                            {t('channels.dialogs.settings.overrides.headers.claudeCodeHeaders.label')}
+                          </Label>
+                          <p className='text-muted-foreground text-sm'>
+                            {t('channels.dialogs.settings.overrides.headers.claudeCodeHeaders.description')}
+                          </p>
+                        </div>
+                        <Switch
+                          id='claudeCodeHeaders'
+                          data-testid='claude-code-headers-switch'
+                          checked={form.watch('claudeCodeHeaders') || false}
+                          onCheckedChange={(checked) => form.setValue('claudeCodeHeaders', checked === true)}
+                        />
+                      </div>
+                    )}
                     {headerFields.map((field, index) => (
                       <HeaderOperationRow
                         key={field.id}
