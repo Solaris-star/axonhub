@@ -2598,6 +2598,32 @@ export function ChannelsActionDialog({ currentRow, duplicateFromRow, open, onOpe
                         />
                       )}
 
+                      {selectedType?.startsWith('openai') && (
+                        <FormField
+                          control={form.control}
+                          name='settings.codexHeaders'
+                          render={({ field }) => (
+                            <FormItem className='grid grid-cols-1 items-start gap-x-6 gap-y-2 md:grid-cols-8'>
+                              <FormLabel className='pt-2 font-medium md:col-span-2 md:text-right'>
+                                {t('channels.dialogs.settings.overrides.headers.codexHeaders.label')}
+                              </FormLabel>
+                              <div className='space-y-2 md:col-span-6'>
+                                <FormControl>
+                                  <Switch
+                                    data-testid='codex-headers-switch'
+                                    checked={field.value === true}
+                                    onCheckedChange={(checked) => field.onChange(checked === true)}
+                                  />
+                                </FormControl>
+                                <p className='text-muted-foreground text-xs'>
+                                  {t('channels.dialogs.settings.overrides.headers.codexHeaders.description')}
+                                </p>
+                              </div>
+                            </FormItem>
+                          )}
+                        />
+                      )}
+
                       <FormItem className='grid grid-cols-1 items-start gap-x-6 gap-y-2 md:grid-cols-8'>
                         <div className='flex items-center gap-1.5 pt-2 md:col-span-2 md:justify-end'>
                           <FormLabel className='font-medium'>{t('channels.dialogs.retryableStatusCodes.label')}</FormLabel>

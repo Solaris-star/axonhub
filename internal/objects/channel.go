@@ -204,6 +204,13 @@ type ChannelSettings struct {
 	// and type are unchanged and no request body / system prompt is injected. The channel's own
 	// header overrides take precedence on path collision. nil/false = off.
 	ClaudeCodeHeaders *bool `json:"claudeCodeHeaders,omitempty"`
+
+	// CodexHeaders, when true, injects the Codex CLI header set (User-Agent: codex_cli_rs,
+	// originator: codex_cli_rs) into outbound requests as the base header-override set. The
+	// channel's auth and type are unchanged and no request body is injected. The channel's own
+	// header overrides take precedence on path collision. Takes precedence over ClaudeCodeHeaders
+	// when both are set. nil/false = off. Intended for openai-type channels.
+	CodexHeaders *bool `json:"codexHeaders,omitempty"`
 }
 
 type RetryableErrorPattern struct {

@@ -113,6 +113,7 @@ export function mergeChannelSettingsForUpdate(
     retryableStatusCodes: pick('retryableStatusCodes', existing?.retryableStatusCodes ?? []),
     retryableErrorPatterns: pick('retryableErrorPatterns', existing?.retryableErrorPatterns ?? []),
     claudeCodeHeaders: pick('claudeCodeHeaders', existing?.claudeCodeHeaders ?? false),
+    codexHeaders: pick('codexHeaders', existing?.codexHeaders ?? false),
   };
 }
 

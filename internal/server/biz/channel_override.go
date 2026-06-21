@@ -79,8 +79,14 @@ func (c *Channel) GetHeaderOverrideOperations() []objects.OverrideOperation {
 		}
 	}
 
-	// ClaudeCodeHeaders toggle: use the standard Claude Code CLI header set as the base,
-	// with the channel's own header overrides taking precedence on path collision.
+	// Disguise toggles: use a base header set with the channel's own header overrides taking
+	// precedence on path collision. CodexHeaders takes precedence over ClaudeCodeHeaders when
+	// both are set.
+	if c.Settings != nil && c.Settings.CodexHeaders != nil && *c.Settings.CodexHeaders {
+		c.cachedOverrideHeaders = MergeOverrideHeaders(codexHeaderOps(), userOps)
+		return c.cachedOverrideHeaders
+	}
+
 	if c.Settings != nil && c.Settings.ClaudeCodeHeaders != nil && *c.Settings.ClaudeCodeHeaders {
 		c.cachedOverrideHeaders = MergeOverrideHeaders(claudeCodeHeaderOps(), userOps)
 		return c.cachedOverrideHeaders
@@ -117,6 +123,17 @@ func claudeCodeHeaderOps() []objects.OverrideOperation {
 		{Op: objects.OverrideOpSet, Path: "X-Stainless-Arch", Value: "arm64"},
 		{Op: objects.OverrideOpSet, Path: "X-Stainless-Os", Value: "MacOS"},
 		{Op: objects.OverrideOpSet, Path: "X-Stainless-Timeout", Value: "600"},
+	}
+}
+
+// codexHeaderOps returns the Codex CLI outbound header set as "set" override operations.
+// Used by the per-channel CodexHeaders toggle to disguise outbound openai requests as the
+// official Codex CLI while keeping the channel's own auth and type unchanged. These two
+// headers are sufficient to pass upstreams that only allow Codex clients.
+func codexHeaderOps() []objects.OverrideOperation {
+	return []objects.OverrideOperation{
+		{Op: objects.OverrideOpSet, Path: "User-Agent", Value: "codex_cli_rs/0.21.0 (Mac OS 15.6.0; arm64)"},
+		{Op: objects.OverrideOpSet, Path: "originator", Value: "codex_cli_rs"},
 	}
 }
 

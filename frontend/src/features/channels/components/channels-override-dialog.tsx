@@ -123,6 +123,7 @@ const overrideFormSchema = z.object({
   headerOverrideOperations: z.array(overrideOperationSchema).optional(),
   bodyOverrideOperations: z.array(overrideOperationSchema).optional(),
   claudeCodeHeaders: z.boolean().optional(),
+  codexHeaders: z.boolean().optional(),
 });
 
 type OverrideFormValues = z.infer<typeof overrideFormSchema>;
@@ -531,6 +532,7 @@ export function ChannelsOverrideDialog({ open, onOpenChange, currentRow }: Props
       headerOverrideOperations: currentRow.settings?.headerOverrideOperations || [],
       bodyOverrideOperations: currentRow.settings?.bodyOverrideOperations || [],
       claudeCodeHeaders: currentRow.settings?.claudeCodeHeaders ?? false,
+      codexHeaders: currentRow.settings?.codexHeaders ?? false,
     },
   });
 
@@ -561,6 +563,7 @@ export function ChannelsOverrideDialog({ open, onOpenChange, currentRow }: Props
       headerOverrideOperations: nextHeaders,
       bodyOverrideOperations: nextParams,
       claudeCodeHeaders: currentRow.settings?.claudeCodeHeaders ?? false,
+      codexHeaders: currentRow.settings?.codexHeaders ?? false,
     });
   }, [currentRow, open, form]);
 
@@ -663,6 +666,7 @@ export function ChannelsOverrideDialog({ open, onOpenChange, currentRow }: Props
         bodyOverrideOperations: validBodyOps,
         headerOverrideOperations: validHeaderOps,
         claudeCodeHeaders: data.claudeCodeHeaders ?? false,
+        codexHeaders: data.codexHeaders ?? false,
       });
 
       await updateChannel.mutateAsync({
@@ -867,6 +871,24 @@ export function ChannelsOverrideDialog({ open, onOpenChange, currentRow }: Props
                           data-testid='claude-code-headers-switch'
                           checked={form.watch('claudeCodeHeaders') || false}
                           onCheckedChange={(checked) => form.setValue('claudeCodeHeaders', checked === true)}
+                        />
+                      </div>
+                    )}
+                    {currentRow.type.startsWith('openai') && (
+                      <div className='flex items-center justify-between rounded-md border p-3'>
+                        <div className='space-y-0.5 pr-4'>
+                          <Label htmlFor='codexHeaders'>
+                            {t('channels.dialogs.settings.overrides.headers.codexHeaders.label')}
+                          </Label>
+                          <p className='text-muted-foreground text-sm'>
+                            {t('channels.dialogs.settings.overrides.headers.codexHeaders.description')}
+                          </p>
+                        </div>
+                        <Switch
+                          id='codexHeaders'
+                          data-testid='codex-headers-switch'
+                          checked={form.watch('codexHeaders') || false}
+                          onCheckedChange={(checked) => form.setValue('codexHeaders', checked === true)}
                         />
                       </div>
                     )}

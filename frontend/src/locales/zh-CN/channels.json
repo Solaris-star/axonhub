@@ -452,6 +452,8 @@
   "channels.dialogs.settings.overrides.headers.description": "配置自定义 HTTP 请求头，会应用到通过此渠道发送的所有请求。",
   "channels.dialogs.settings.overrides.headers.claudeCodeHeaders.label": "伪装为 Claude Code",
   "channels.dialogs.settings.overrides.headers.claudeCodeHeaders.description": "启用后向上游注入完整的 claude-code CLI 请求头（User-Agent、Anthropic-Beta、X-App、X-Stainless-* 等），用于绕过上游对二次中转的客户端检测；认证方式（x-api-key）与渠道类型保持不变，不修改请求体。",
+  "channels.dialogs.settings.overrides.headers.codexHeaders.label": "伪装为 Codex",
+  "channels.dialogs.settings.overrides.headers.codexHeaders.description": "向上游注入 Codex CLI 客户端头（User-Agent: codex_cli_rs、originator: codex_cli_rs），用于绕过只放行 Codex 客户端的上游限制；仅 openai 类型渠道。",
   "channels.dialogs.settings.overrides.headers.key": "键名",
   "channels.dialogs.settings.overrides.headers.keyPlaceholder": "例如 X-Custom-Header",
   "channels.dialogs.settings.overrides.headers.value": "值",

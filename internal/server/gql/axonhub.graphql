@@ -135,6 +135,7 @@ type ChannelSettings {
   retryableStatusCodes: [Int!]
   retryableErrorPatterns: [RetryableErrorPattern!]
   claudeCodeHeaders: Boolean
+  codexHeaders: Boolean
 }
 
 enum CapabilityPolicy {
@@ -173,6 +174,7 @@ input ChannelSettingsInput {
   retryableStatusCodes: [Int!]
   retryableErrorPatterns: [RetryableErrorPatternInput!]
   claudeCodeHeaders: Boolean
+  codexHeaders: Boolean
 }
 
 input ChannelRateLimitInput {
